@@ -1,4 +1,4 @@
-import { CANVAS, GAME } from "./constants";
+import { CANVAS, FIRST_OBSTACLE_DELAY, GAME, TUTORIAL_OBSTACLE_GAP } from "./constants";
 import { InputManager } from "./InputManager";
 import { Obstacle, type ObstacleType } from "./Obstacle";
 import { Player, type Rect } from "./Player";
@@ -7,13 +7,14 @@ export class Game {
   private player = new Player();
   private obstacles: Obstacle[] = [];
   private lastTime = 0;
-  private distanceToSpawn = 420;
+  private distanceToSpawn = GAME.initialSpeed * FIRST_OBSTACLE_DELAY;
   private elapsed = 0;
   private score = 0;
   private highScore = Number(localStorage.getItem(GAME.highScoreKey) ?? 0);
   private dead = false;
   private begun = false;
   private lastObstacle: ObstacleType | null = null;
+  private tutorialObstacleIndex = 0;
   micEnabled = false;
   debugHitboxes = false;
 
@@ -29,11 +30,14 @@ export class Game {
     this.update(dt); this.draw(); requestAnimationFrame(this.loop);
   };
   private update(dt: number): void {
-    for (const action of this.input.drain()) {
+    for (const queued of this.input.drain()) {
+      const action = queued.action;
+      const stateBefore = this.player.state;
       if (action === "RESTART" && this.dead) this.restart();
       else if (!this.dead && action === "SLIDE") this.player.slide();
       else if (!this.dead && action === "SHORT_JUMP") this.player.shortJump();
       else if (!this.dead && action === "LONG_JUMP") this.player.longJump();
+      if (this.player.state !== stateBefore) queued.onApplied?.(performance.now());
     }
     if (this.dead || !this.begun) return;
     this.elapsed += dt;
@@ -48,19 +52,34 @@ export class Game {
   }
   private spawn(speed: number): void {
     const types: ObstacleType[] = ["LOW", "WIDE", "HIGH"];
-    let type = types[Math.floor(Math.random() * types.length)];
-    if (type === this.lastObstacle && Math.random() < 0.65) type = types[(types.indexOf(type) + 1) % types.length];
+    const tutorialTypes: ObstacleType[] = ["HIGH", "LOW", "WIDE"];
+    const tutorialActions = ["SLIDE", "SHORT_JUMP", "LONG_JUMP"] as const;
+    const tutorialCommands = ["UM", "YE", "JWEJWEIYA"] as const;
+    const tutorial = this.tutorialObstacleIndex < tutorialTypes.length;
+    let type = tutorial ? tutorialTypes[this.tutorialObstacleIndex] : types[Math.floor(Math.random() * types.length)];
+    if (!tutorial && type === this.lastObstacle && Math.random() < 0.65) type = types[(types.indexOf(type) + 1) % types.length];
     this.obstacles.push(new Obstacle(type, CANVAS.width + 30, speed));
     this.lastObstacle = type;
+    if (tutorial) {
+      const expected = tutorialCommands[this.tutorialObstacleIndex];
+      const action = tutorialActions[this.tutorialObstacleIndex];
+      console.debug(`Obstacle #${this.tutorialObstacleIndex + 1}: ${type} (${action}) / expected ${expected}`);
+      this.tutorialObstacleIndex++;
+    } else console.debug("Obstacle #4+: RANDOM", type);
     const reactionScale = Math.min(speed / GAME.initialSpeed, 1.7);
-    this.distanceToSpawn = (GAME.minSpawnGap + Math.random() * (GAME.maxSpawnGap - GAME.minSpawnGap)) * reactionScale;
+    this.distanceToSpawn = this.tutorialObstacleIndex > 0 && this.tutorialObstacleIndex < tutorialTypes.length
+      ? speed * TUTORIAL_OBSTACLE_GAP
+      : (GAME.minSpawnGap + Math.random() * (GAME.maxSpawnGap - GAME.minSpawnGap)) * reactionScale;
   }
   private intersects(a: Rect, b: Rect): boolean { return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y; }
   private gameOver(): void {
     this.dead = true; this.player.die();
     if (this.score > this.highScore) { this.highScore = this.score; localStorage.setItem(GAME.highScoreKey, String(this.highScore)); }
   }
-  private restart(): void { this.player = new Player(); this.obstacles = []; this.elapsed = 0; this.score = 0; this.dead = false; this.distanceToSpawn = 420; this.lastObstacle = null; }
+  private restart(): void {
+    this.player = new Player(); this.obstacles = []; this.elapsed = 0; this.score = 0; this.dead = false;
+    this.distanceToSpawn = GAME.initialSpeed * FIRST_OBSTACLE_DELAY; this.lastObstacle = null; this.tutorialObstacleIndex = 0;
+  }
   private draw(): void {
     const ctx = this.canvas.getContext("2d"); if (!ctx) return;
     ctx.fillStyle = "#f7f7f7"; ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);

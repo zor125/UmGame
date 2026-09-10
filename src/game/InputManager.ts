@@ -1,14 +1,12 @@
 import type { VoiceCommand } from "../audio/types";
 
 export type GameAction = "SLIDE" | "SHORT_JUMP" | "LONG_JUMP" | "RESTART";
+export interface QueuedAction { action: GameAction; onApplied?: (timestamp: number) => void; }
 
 export class InputManager {
-  private readonly queue: GameAction[] = [];
+  private readonly queue: QueuedAction[] = [];
   private readonly keyHandler = (event: KeyboardEvent): void => {
-    const action: GameAction | null = event.code === "ArrowDown" ? "SLIDE"
-      : event.code === "Space" ? "SHORT_JUMP"
-      : event.code === "ArrowUp" ? "LONG_JUMP"
-      : event.code === "KeyR" ? "RESTART" : null;
+    const action: GameAction | null = event.code === "KeyR" ? "RESTART" : null;
     if (action) {
       event.preventDefault();
       this.push(action);
@@ -16,10 +14,10 @@ export class InputManager {
   };
 
   constructor() { window.addEventListener("keydown", this.keyHandler); }
-  push(action: GameAction): void { this.queue.push(action); }
-  fromVoice(command: VoiceCommand): void {
-    if (command !== "UNKNOWN") this.push(command);
+  push(action: GameAction, onApplied?: (timestamp: number) => void): void { this.queue.push({ action, onApplied }); }
+  fromVoice(command: VoiceCommand, onApplied?: (timestamp: number) => void): void {
+    if (command !== "UNKNOWN") this.push(command, onApplied);
   }
-  drain(): GameAction[] { return this.queue.splice(0); }
+  drain(): QueuedAction[] { return this.queue.splice(0); }
   destroy(): void { window.removeEventListener("keydown", this.keyHandler); }
 }

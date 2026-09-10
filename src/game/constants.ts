@@ -18,15 +18,18 @@ export const GAME = {
   initialSpeed: 330,
   maxSpeed: 650,
   acceleration: 5.5,
-  minSpawnGap: 330,
-  maxSpawnGap: 570,
+  minSpawnGap: 446,
+  maxSpawnGap: 770,
   highScoreKey: "um-runner-high-score",
 } as const;
+
+export const FIRST_OBSTACLE_DELAY = 2.0;
+export const TUTORIAL_OBSTACLE_GAP = 2.7;
 
 export const AUDIO_CONFIG = {
   fftSize: 2048,
   vadThreshold: 0.025,
-  vadSilenceMs: 260,
+  vadSilenceMs: 230,
   vadMinDurationMs: 150,
   vadMaxDurationMs: 2000,
   commandThreshold: 0.75,

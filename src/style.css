@@ -5,7 +5,7 @@ button, input { font: inherit; }
 .app-shell { min-height: 100svh; display: grid; place-items: center; padding: 24px 16px; }
 .game-column { width: min(960px, calc(100vw - 32px)); }
 canvas { display: block; width: min(960px, calc(100vw - 32px)); height: auto; aspect-ratio: 960 / 300; background: #f7f7f7; image-rendering: pixelated; cursor: pointer; }
-#debug-panel { display: none; position: fixed; z-index: 10; top: 12px; right: 12px; width: 280px; max-height: calc(100vh - 24px); overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+#debug-panel { display: none; position: fixed; z-index: 1000; top: 12px; right: 12px; width: 280px; max-height: calc(100vh - 24px); overflow: auto; pointer-events: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 #debug-panel.visible { display: grid; gap: 8px; }
 .panel-card { padding: 12px; border: 1px solid #bbb; background: rgba(247,247,247,.96); }
 .panel-heading { display: flex; justify-content: space-between; color: #333; font: 700 12px ui-monospace, monospace; }
@@ -15,5 +15,9 @@ canvas { display: block; width: min(960px, calc(100vw - 32px)); height: auto; as
 .slider-label { display: grid; grid-template-columns: 1fr auto; gap: 5px; color: #555; font-size: 11px; }.slider-label input { grid-column: 1 / -1; width: 100%; accent-color: #333; }
 .check-label { display: block; margin: 10px 0; color: #555; font-size: 11px; }.check-label input { accent-color: #333; }
 .test-buttons { display: grid; gap: 5px; }.test-buttons button { padding: 6px; border: 1px solid #aaa; border-radius: 0; color: #333; background: #f7f7f7; cursor: pointer; }
+.training h2 { margin: 0 0 8px; color: #555; font: 700 10px ui-monospace, monospace; }
+.training-button, #reset-training { display: flex; justify-content: space-between; width: 100%; margin-top: 5px; padding: 7px; border: 1px solid #aaa; border-radius: 0; color: #333; background: #f7f7f7; cursor: pointer; }
+.training-button.active { color: #fff; background: #333; }.training-button span { font-size: 10px; }
+#reset-training { justify-content: center; margin-top: 10px; color: #8b2525; }
 .references h2 { margin: 0 0 8px; color: #555; font: 700 10px ui-monospace, monospace; }.reference { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 6px; padding: 7px 0; border-top: 1px solid #ddd; color: #666; font: 10px ui-monospace, monospace; }.reference strong { color: #333; }.muted { color: #777; font-size: 11px; }
 @media (max-width: 650px) { .app-shell { padding: 8px; } #debug-panel { left: 8px; right: 8px; width: auto; } }
