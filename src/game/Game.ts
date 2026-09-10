@@ -12,13 +12,17 @@ export class Game {
   private score = 0;
   private highScore = Number(localStorage.getItem(GAME.highScoreKey) ?? 0);
   private dead = false;
+  private begun = false;
   private lastObstacle: ObstacleType | null = null;
+  micEnabled = false;
   debugHitboxes = false;
 
   constructor(private readonly canvas: HTMLCanvasElement, private readonly input: InputManager) {
     canvas.addEventListener("click", () => { if (this.dead) this.input.push("RESTART"); });
   }
   start(): void { requestAnimationFrame(this.loop); }
+  begin(): void { this.begun = true; }
+  hasBegun(): boolean { return this.begun; }
   private readonly loop = (time: number): void => {
     const dt = this.lastTime ? Math.min((time - this.lastTime) / 1000, 0.05) : 0;
     this.lastTime = time;
@@ -31,7 +35,7 @@ export class Game {
       else if (!this.dead && action === "SHORT_JUMP") this.player.shortJump();
       else if (!this.dead && action === "LONG_JUMP") this.player.longJump();
     }
-    if (this.dead) return;
+    if (this.dead || !this.begun) return;
     this.elapsed += dt;
     const speed = Math.min(GAME.initialSpeed + this.elapsed * GAME.acceleration, GAME.maxSpeed);
     this.score = Math.floor(this.elapsed * 10);
@@ -46,7 +50,7 @@ export class Game {
     const types: ObstacleType[] = ["LOW", "WIDE", "HIGH"];
     let type = types[Math.floor(Math.random() * types.length)];
     if (type === this.lastObstacle && Math.random() < 0.65) type = types[(types.indexOf(type) + 1) % types.length];
-    this.obstacles.push(new Obstacle(type));
+    this.obstacles.push(new Obstacle(type, CANVAS.width + 30, speed));
     this.lastObstacle = type;
     const reactionScale = Math.min(speed / GAME.initialSpeed, 1.7);
     this.distanceToSpawn = (GAME.minSpawnGap + Math.random() * (GAME.maxSpawnGap - GAME.minSpawnGap)) * reactionScale;
@@ -59,14 +63,18 @@ export class Game {
   private restart(): void { this.player = new Player(); this.obstacles = []; this.elapsed = 0; this.score = 0; this.dead = false; this.distanceToSpawn = 420; this.lastObstacle = null; }
   private draw(): void {
     const ctx = this.canvas.getContext("2d"); if (!ctx) return;
-    const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS.height); gradient.addColorStop(0, "#16243b"); gradient.addColorStop(1, "#0b1220");
-    ctx.fillStyle = gradient; ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
-    ctx.fillStyle = "rgba(255,255,255,.05)";
-    for (let x = 0; x < CANVAS.width; x += 80) ctx.fillRect(x, 65 + (x % 160), 2, 2);
-    ctx.strokeStyle = "#64748b"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, CANVAS.groundY + 2); ctx.lineTo(CANVAS.width, CANVAS.groundY + 2); ctx.stroke();
+    ctx.fillStyle = "#f7f7f7"; ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
+    ctx.strokeStyle = "#444"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, CANVAS.groundY + .5); ctx.lineTo(CANVAS.width, CANVAS.groundY + .5); ctx.stroke();
+    ctx.fillStyle = "#333"; ctx.font = "14px ui-monospace, monospace";
+    ctx.textAlign = "left"; ctx.fillText(this.micEnabled ? "MIC ON" : "MIC OFF", 16, 25);
+    ctx.textAlign = "right"; ctx.fillText(`HI ${String(this.highScore).padStart(5, "0")}   ${String(this.score).padStart(5, "0")}`, CANVAS.width - 16, 25);
+    if (!this.begun) {
+      ctx.textAlign = "center"; ctx.fillStyle = "#333"; ctx.font = "bold 28px ui-monospace, monospace"; ctx.fillText("UM GAME", CANVAS.width / 2, 76);
+      ctx.font = "14px ui-monospace, monospace"; ctx.textAlign = "left";
+      const x = CANVAS.width / 2 - 110; ctx.fillText('"엄"          SLIDE', x, 112); ctx.fillText('"예?"         SHORT JUMP', x, 138); ctx.fillText('"줴줴이야"     LONG JUMP', x, 164);
+      ctx.textAlign = "center"; ctx.font = "bold 15px ui-monospace, monospace"; ctx.fillText("CLICK TO START", CANVAS.width / 2, 207); return;
+    }
     this.player.draw(ctx, this.debugHitboxes); this.obstacles.forEach((obstacle) => obstacle.draw(ctx, this.debugHitboxes));
-    ctx.textAlign = "right"; ctx.fillStyle = "#e8eef9"; ctx.font = "700 18px ui-monospace, monospace"; ctx.fillText(`SCORE ${String(this.score).padStart(5, "0")}`, CANVAS.width - 24, 32); ctx.fillStyle = "#8fa2bd"; ctx.fillText(`BEST ${String(this.highScore).padStart(5, "0")}`, CANVAS.width - 24, 57);
-    ctx.textAlign = "left"; ctx.fillStyle = "#3dd6a2"; ctx.font = "600 14px system-ui"; ctx.fillText("● MIC STATUS IN PANEL", 24, 30);
-    if (this.dead) { ctx.fillStyle = "rgba(5,10,20,.72)"; ctx.fillRect(0, 0, CANVAS.width, CANVAS.height); ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.font = "800 42px system-ui"; ctx.fillText("GAME OVER", CANVAS.width / 2, 170); ctx.fillStyle = "#f7c948"; ctx.font = "600 18px system-ui"; ctx.fillText("R 키 또는 화면 클릭으로 다시 시작", CANVAS.width / 2, 210); }
+    if (this.dead) { ctx.fillStyle = "rgba(247,247,247,.88)"; ctx.fillRect(320, 91, 320, 82); ctx.textAlign = "center"; ctx.fillStyle = "#333"; ctx.font = "bold 24px ui-monospace, monospace"; ctx.fillText("GAME OVER", CANVAS.width / 2, 122); ctx.font = "13px ui-monospace, monospace"; ctx.fillText("PRESS R TO RESTART", CANVAS.width / 2, 151); }
   }
 }

@@ -1,9 +1,11 @@
 import { CANVAS, PLAYER } from "./constants";
+import { PlayerRenderer, type PlayerVisualState } from "./render/PlayerRenderer";
 
 export enum PlayerState { RUNNING, SLIDING, SHORT_JUMP, LONG_JUMP, DEAD }
 export interface Rect { x: number; y: number; width: number; height: number }
 
 export class Player {
+  private readonly renderer = new PlayerRenderer();
   readonly x = PLAYER.x;
   private y = CANVAS.groundY - PLAYER.height;
   private velocityY = 0;
@@ -30,7 +32,8 @@ export class Player {
       return;
     }
     if (this.state === PlayerState.SHORT_JUMP || this.state === PlayerState.LONG_JUMP) {
-      this.velocityY += PLAYER.gravity * deltaTime;
+      const gravity = this.state === PlayerState.SHORT_JUMP ? PLAYER.shortJumpGravity : PLAYER.longJumpGravity;
+      this.velocityY += gravity * deltaTime;
       this.y += this.velocityY * deltaTime;
       const floor = CANVAS.groundY - PLAYER.height;
       if (this.y >= floor) { this.y = floor; this.velocityY = 0; this.state = PlayerState.RUNNING; }
@@ -43,18 +46,12 @@ export class Player {
   }
   die(): void { this.state = PlayerState.DEAD; }
   draw(ctx: CanvasRenderingContext2D, debug = false): void {
-    const box = this.getHitbox();
-    ctx.save();
-    ctx.fillStyle = this.state === PlayerState.DEAD ? "#ef476f" : "#f7c948";
-    ctx.fillRect(box.x - 5, box.y - (this.state === PlayerState.SLIDING ? 2 : 3), PLAYER.width, this.state === PlayerState.SLIDING ? PLAYER.slideHeight : PLAYER.height);
-    ctx.fillStyle = "#101827";
-    ctx.fillRect(box.x + box.width - 8, box.y + 10, 5, 5);
-    if (this.state !== PlayerState.SLIDING) {
-      const stride = Math.floor(performance.now() / 110) % 2;
-      ctx.fillRect(box.x + 3, box.y + box.height, 9, stride ? 9 : 5);
-      ctx.fillRect(box.x + 25, box.y + box.height, 9, stride ? 5 : 9);
-    }
-    if (debug) { ctx.strokeStyle = "#ff4d6d"; ctx.lineWidth = 2; ctx.strokeRect(box.x, box.y, box.width, box.height); }
-    ctx.restore();
+    this.renderer.draw(ctx, {
+      state: PlayerState[this.state] as PlayerVisualState,
+      x: this.x,
+      y: this.y,
+      groundY: CANVAS.groundY,
+      hitbox: this.getHitbox(),
+    }, debug);
   }
 }

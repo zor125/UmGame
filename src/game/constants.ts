@@ -1,4 +1,4 @@
-export const CANVAS = { width: 960, height: 420, groundY: 342 } as const;
+export const CANVAS = { width: 960, height: 300, groundY: 238 } as const;
 
 export const PLAYER = {
   x: 120,
@@ -6,10 +6,13 @@ export const PLAYER = {
   height: 66,
   slideHeight: 34,
   slideDuration: 620,
-  gravity: 1850,
-  shortJumpVelocity: -650,
+  shortJumpGravity: 2300,
+  longJumpGravity: 1850,
+  shortJumpVelocity: -520,
   longJumpVelocity: -850,
 } as const;
+
+export const PLAYER_RENDER_SIZE = 56;
 
 export const GAME = {
   initialSpeed: 330,
