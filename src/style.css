@@ -1,0 +1,25 @@
+:root { font-family: Inter, Pretendard, system-ui, sans-serif; color: #e8eef9; background: #070c15; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 25% 10%, #182a48, transparent 38%), #070c15; }
+button, input { font: inherit; }
+.app-shell { width: min(1400px, calc(100% - 32px)); margin: 0 auto; min-height: 100vh; display: grid; grid-template-columns: minmax(0, 960px) 320px; gap: 24px; align-items: center; justify-content: center; padding: 32px 0; }
+header { display: flex; align-items: baseline; gap: 18px; margin-bottom: 12px; }
+h1 { margin: 0; color: #f7c948; font: 900 25px ui-monospace, monospace; letter-spacing: .08em; }
+header p, .controls { margin: 0; color: #8190a8; font-size: 13px; }
+.canvas-wrap { position: relative; border: 1px solid #293b58; border-radius: 12px; overflow: hidden; box-shadow: 0 28px 80px rgba(0,0,0,.35); }
+canvas { display: block; width: 100%; height: auto; }
+.mic-button { position: absolute; left: 18px; bottom: 16px; padding: 9px 13px; border: 1px solid #455a78; border-radius: 7px; color: #e8eef9; background: rgba(10,18,32,.85); cursor: pointer; }
+.mic-button.enabled { border-color: #3dd6a2; color: #3dd6a2; }
+.controls { margin-top: 12px; text-align: center; }
+#debug-panel { display: grid; gap: 14px; }
+.panel-card { padding: 18px; border: 1px solid #293b58; border-radius: 10px; background: rgba(16,24,39,.88); box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+.panel-heading { display: flex; justify-content: space-between; color: #f7c948; font: 800 13px ui-monospace, monospace; letter-spacing: .08em; }
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: #53627a; }.status-dot.active { background: #3dd6a2; box-shadow: 0 0 12px #3dd6a2; }
+.metrics { margin: 14px 0; font: 12px ui-monospace, monospace; }
+.metrics div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.05); }.metrics dt { color: #8190a8; }.metrics dd { margin: 0; }.accent { color: #3dd6a2; }
+.slider-label { display: grid; grid-template-columns: 1fr auto; gap: 5px; color: #aebbd0; font-size: 12px; }.slider-label input { grid-column: 1 / -1; width: 100%; accent-color: #f7c948; }
+.check-label { display: block; margin: 12px 0; color: #aebbd0; font-size: 12px; }.check-label input { accent-color: #f7c948; }
+.test-buttons { display: grid; grid-template-columns: 1fr; gap: 7px; }.test-buttons button { padding: 8px; border: 1px solid #364b6d; border-radius: 5px; color: #dce6f5; background: #18263b; cursor: pointer; }.test-buttons button:hover { border-color: #f7c948; }
+.references h2 { margin: 0 0 12px; color: #7c8da7; font: 800 11px ui-monospace, monospace; letter-spacing: .08em; }.reference { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; padding: 9px 0; border-top: 1px solid #263750; color: #93a3bb; font: 11px ui-monospace, monospace; }.reference strong { color: #e8eef9; }.muted { color: #8190a8; font-size: 12px; }
+@media (max-width: 1100px) { .app-shell { grid-template-columns: minmax(0,960px); align-items: start; }.game-column { margin-top: 20px; } #debug-panel { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 650px) { .app-shell { width: calc(100% - 20px); padding: 12px 0; } header { display: block; } header p { margin-top: 5px; } #debug-panel { grid-template-columns: 1fr; }.mic-button { font-size: 11px; } }
